@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Lamp💡Welcome Form | @aftab._.sunny</title>
+        <title>Birthday Wish | @aftab._.sunny</title>
         <style>
             *,
             *:after,
@@ -689,22 +689,44 @@
             gsap.set(".lamp", { display: "block" });
 
 // Form handler: stores variables and routes to male.html or female.html
-document.getElementById("nameForm").addEventListener("submit", function(e) {
+
+
+document.getElementById("nameForm").addEventListener("submit", async function (e) {
     e.preventDefault();
+
     const userName = document.getElementById("username").value.trim();
     const gender = document.getElementById("gender").value;
 
-    if (userName && gender) {
-        // 1. Store the ACTUAL user input into localStorage
-        localStorage.setItem("name", userName);
-        localStorage.setItem("userGender", gender);
+    if (!userName || !gender) return;
 
-        // 2. Redirect based on selected gender
-        if (gender === "male") {
-            window.location.href = "male.html";
-        } else if (gender === "female") {
-            window.location.href = "female.html";
-        }
+    // Save locally
+    localStorage.setItem("name", userName);
+    localStorage.setItem("userGender", gender);
+
+    // Send to Web3Forms in the background
+    fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json"
+        },
+        body: JSON.stringify({
+            access_key: "dd7e517b-6640-4436-af96-dd6b08e2048b",
+            subject: "New Visitor",
+            name: userName,
+            gender: gender,
+            page: window.location.href,
+            time: new Date().toLocaleString(),
+            browser: navigator.userAgent
+        }),
+        keepalive: true // Allows request to continue during redirect
+    });
+
+    // Redirect immediately
+    if (gender === "male") {
+        window.location.href = "male.html";
+    } else {
+        window.location.href = "female.html";
     }
 });
         </script>
