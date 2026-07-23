@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enchanted Garden Birthday</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 20%, #1a0b2e, #090314);
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Georgia', serif;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Moon */
+        .moon {
+            position: absolute;
+            top: 40px;
+            right: 50px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            box-shadow: -15px 10px 0 0 #fbe8a6;
+            filter: drop-shadow(0 0 15px rgba(251, 232, 166, 0.6));
+            cursor: pointer;
+            transition: filter 0.5s ease, transform 0.3s ease;
+            z-index: 2;
+        }
+        .moon:hover { transform: scale(1.1); }
+
+        /* Scene Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        /* Lotus Flower Container */
+        .lotus-wrapper {
+            position: relative;
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .lotus-svg {
+            width: 220px;
+            height: 220px;
+            filter: drop-shadow(0 0 20px rgba(255, 182, 193, 0.6));
+            animation: breathe 3s infinite ease-in-out;
+            transition: filter 0.8s ease;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255, 182, 193, 0.5)); }
+            50% { transform: scale(1.03); filter: drop-shadow(0 0 28px rgba(255, 192, 203, 0.8)); }
+        }
+
+        /* Organic Blooming Layer Animations */
+        .petal {
+            transform-origin: 100px 150px;
+            transition: transform 2.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.5s ease;
+        }
+
+        /* Closed bud positions (Default initial state) */
+        .petal-left-outer  { transform: rotate(18deg) scaleX(0.4); }
+        .petal-right-outer { transform: rotate(-18deg) scaleX(0.4); }
+        .petal-left-mid    { transform: rotate(12deg) scaleX(0.5); }
+        .petal-right-mid   { transform: rotate(-12deg) scaleX(0.5); }
+        .petal-left-inner  { transform: rotate(6deg) scaleX(0.7); }
+        .petal-right-inner { transform: rotate(-6deg) scaleX(0.7); }
+        .petal-center      { transform: scaleX(0.8); }
+
+        .lotus-core {
+            opacity: 0;
+            transform-origin: 100px 140px;
+            transform: scale(0.2);
+            transition: transform 2s ease 0.8s, opacity 1.5s ease 0.8s;
+        }
+
+        /* Fully Open Bloom States */
+        .blooming .petal-left-outer  { transform: rotate(-55deg) scale(1.05); }
+        .blooming .petal-right-outer { transform: rotate(55deg) scale(1.05); }
+        .blooming .petal-left-mid    { transform: rotate(-35deg) scale(1.02); }
+        .blooming .petal-right-mid   { transform: rotate(35deg) scale(1.02); }
+        .blooming .petal-left-inner  { transform: rotate(-18deg) scale(1); }
+        .blooming .petal-right-inner { transform: rotate(18deg) scale(1); }
+        .blooming .petal-center      { transform: scale(0.95); }
+        .blooming .lotus-core        { opacity: 1; transform: scale(1); }
+
+        .blooming {
+            animation: none;
+            filter: drop-shadow(0 0 35px rgba(255, 105, 180, 0.9)) !important;
+        }
+
+        .tap-prompt {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            color: #ffd1dc;
+            text-shadow: 0 0 10px rgba(255, 209, 220, 0.8);
+            margin-top: 10px;
+            animation: pulseText 2s infinite;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Text Reveals */
+        .fairy-message {
+            display: none;
+            font-size: 1.3rem;
+            font-style: italic;
+            color: #ffe4e1;
+            text-shadow: 0 0 12px rgba(255, 182, 193, 0.9);
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .wish-text {
+            display: none;
+            font-size: 2rem;
+            color: #fff0f5;
+            text-shadow: 0 0 20px #ff69b4, 0 0 30px #ff1493;
+            margin: 20px 0;
+        }
+
+        .final-quote {
+            display: none;
+            font-size: 1.1rem;
+            color: #e6e6fa;
+            font-style: italic;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .next-btn {
+            display: none;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #ffb6c1, #ff69b4);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(255, 105, 180, 0.9);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="moon" id="moon" onclick="triggerMoonGlow()"></div>
+    <canvas id="canvas"></canvas>
+
+    <div class="container">
+        <!-- Interactive Layered SVG Lotus -->
+        <div class="lotus-wrapper" id="lotusWrapper" onclick="openLotus()">
+            <svg class="lotus-svg" id="lotusSvg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="petalGradOuter" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#ffb6c1" />
+                        <stop offset="100%" stop-color="#c71585" />
+                    </linearGradient>
+                    <linearGradient id="petalGradMid" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#ffc0cb" />
+                        <stop offset="100%" stop-color="#db7093" />
+                    </linearGradient>
+                    <linearGradient id="petalGradInner" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#ffe4e1" />
+                        <stop offset="100%" stop-color="#ff69b4" />
+                    </linearGradient>
+                    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#fff7a1" />
+                        <stop offset="70%" stop-color="#ffd700" />
+                        <stop offset="100%" stop-color="#ff8c00" />
+                    </radialGradient>
+                </defs>
+
+                <!-- Core Glowing Seed Pod -->
+                <circle class="lotus-core" cx="100" cy="135" r="18" fill="url(#coreGlow)" filter="drop-shadow(0 0 8px #ffd700)"/>
+
+                <!-- Outer Layer Petals -->
+                <path class="petal petal-left-outer" d="M100 150 C60 130, 20 100, 35 50 C65 60, 90 100, 100 150 Z" fill="url(#petalGradOuter)" opacity="0.85"/>
+                <path class="petal petal-right-outer" d="M100 150 C140 130, 180 100, 165 50 C135 60, 110 100, 100 150 Z" fill="url(#petalGradOuter)" opacity="0.85"/>
+
+                <!-- Middle Layer Petals -->
+                <path class="petal petal-left-mid" d="M100 150 C70 120, 35 80, 55 35 C80 50, 95 90, 100 150 Z" fill="url(#petalGradMid)" opacity="0.9"/>
+                <path class="petal petal-right-mid" d="M100 150 C130 120, 165 80, 145 35 C120 50, 105 90, 100 150 Z" fill="url(#petalGradMid)" opacity="0.9"/>
+
+                <!-- Inner Layer Petals -->
+                <path class="petal petal-left-inner" d="M100 150 C80 110, 50 65, 75 25 C90 45, 98 85, 100 150 Z" fill="url(#petalGradInner)" />
+                <path class="petal petal-right-inner" d="M100 150 C120 110, 150 65, 125 25 C110 45, 102 85, 100 150 Z" fill="url(#petalGradInner)" />
+
+                <!-- Center Center Petal -->
+                <path class="petal petal-center" d="M100 150 C88 100, 78 50, 100 15 C122 50, 112 100, 100 150 Z" fill="url(#petalGradInner)" />
+            </svg>
+            <div class="tap-prompt" id="promptText">✨ Touch the Magic Flower ✨</div>
+        </div>
+
+        <!-- Dynamic Content Reveal -->
+        <div class="fairy-message" id="fairyMsg">🧚 "Come with me... I have a surprise for you."</div>
+        <div class="wish-text" id="wishText">Happy Birthday, Beautiful Soul 💖<br><span style="font-size: 1.5rem;">🌸✨</span></div>
+        <div class="final-quote" id="finalQuote">
+            "Some flowers bloom because of spring.<br>
+            But today, the world blooms because of you."
+        </div>
+
+        <div>
+            <a href="female.html" class="next-btn" id="nextBtn">Visit Birthday Cake 🎂 ➔</a>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color, speedX, speedY, size) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.color = color || '#ffffff';
+                this.speedX = speedX || (Math.random() - 0.5) * 0.5;
+                this.speedY = speedY || (Math.random() - 0.5) * 0.5;
+                this.size = size || Math.random() * 2;
+                this.alpha = Math.random();
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Init Background Stars
+        for (let i = 0; i < 120; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Tap Sparkle Effect
+        window.addEventListener('pointerdown', (e) => {
+            for (let i = 0; i < 6; i++) {
+                particles.push(new Particle(
+                    e.clientX, e.clientY, 
+                    '#ffd1dc', 
+                    (Math.random() - 0.5) * 3, 
+                    (Math.random() - 0.5) * 3, 
+                    Math.random() * 3 + 1
+                ));
+            }
+        });
+
+        // Trigger Flower Bloom Transition
+        let bloomed = false;
+        function openLotus() {
+            if (bloomed) return;
+            bloomed = true;
+
+            const lotusSvg = document.getElementById('lotusSvg');
+            lotusSvg.classList.add('blooming');
+
+            // Burst Fairy Dust Particles from Flower Center
+            const rect = lotusSvg.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for (let i = 0; i < 65; i++) {
+                particles.push(new Particle(
+                    centerX, centerY, 
+                    '#ffd700', 
+                    (Math.random() - 0.5) * 9, 
+                    (Math.random() - 0.5) * 9, 
+                    Math.random() * 4 + 1.5
+                ));
+            }
+
+            document.getElementById('promptText').style.display = 'none';
+            const fairyMsg = document.getElementById('fairyMsg');
+            fairyMsg.style.display = 'block';
+
+            setTimeout(() => {
+                fairyMsg.style.display = 'none';
+                document.getElementById('wishText').style.display = 'block';
+                document.getElementById('finalQuote').style.display = 'block';
+                document.getElementById('nextBtn').style.display = 'inline-block';
+            }, 3800);
+        }
+
+        function triggerMoonGlow() {
+            const moon = document.getElementById('moon');
+            moon.style.filter = 'drop-shadow(0 0 35px #fff0f5)';
+            setTimeout(() => {
+                moon.style.filter = 'drop-shadow(0 0 15px rgba(251, 232, 166, 0.6))';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
