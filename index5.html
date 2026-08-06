@@ -34,7 +34,6 @@
             align-items: flex-start;
             padding-top: 10px;
             overflow: hidden;
-            pointer-events: none;
             box-sizing: border-box;
             transition: transform 0.3s ease;
         }
@@ -59,8 +58,71 @@
             font-size: 1.15em !important;
         }
 
-        /* Force landscape rendering in portrait mode */
+        /* --- Rotate Reminder Overlay (Temporary 2s Instruction) --- */
+        #rotate-reminder {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.92);
+            color: #ffffff;
+            z-index: 99999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: opacity 0.5s ease;
+        }
+
+        .phone-icon {
+            width: 50px;
+            height: 85px;
+            border: 4px solid #ffffff;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            position: relative;
+            animation: rotatePhone 1.8s infinite ease-in-out;
+        }
+
+        .phone-icon::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+        }
+
+        @keyframes rotatePhone {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+            100% { transform: rotate(-90deg); }
+        }
+
+        #rotate-reminder h2 {
+            margin: 0 0 10px 0;
+            font-size: 22px;
+        }
+
+        #rotate-reminder p {
+            margin: 0;
+            font-size: 14px;
+            color: #cccccc;
+        }
+
+        /* Force landscape rendering in portrait mobile mode */
         @media screen and (max-width: 900px) and (orientation: portrait) {
+            #rotate-reminder {
+                display: flex !important;
+            }
             #viewport-scaler {
                 position: fixed;
                 width: 100vh !important;
@@ -75,6 +137,7 @@
 
     <script>
         var currentScale = 1;
+        var isForcedRotated = false;
 
         function playAudio() {
             var audio = document.getElementById("myAudio");
@@ -90,10 +153,12 @@
             var windowWidth = $(window).width();
             var windowHeight = $(window).height();
 
-            // Swap dimensions calculation if held vertically in portrait mode
             if (window.innerHeight > window.innerWidth && window.innerWidth <= 900) {
                 windowWidth = $(window).height();
                 windowHeight = $(window).width();
+                isForcedRotated = true;
+            } else {
+                isForcedRotated = false;
             }
 
             var scaleX = windowWidth / targetWidth;
@@ -110,11 +175,27 @@
             $(window).on('resize orientationchange', function() {
                 autoScaleViewport();
             });
+
+            // Show instruction overlay for 2 seconds, then fade out smoothly
+            setTimeout(function() {
+                var reminder = $('#rotate-reminder');
+                reminder.css('opacity', '0');
+                setTimeout(function() {
+                    reminder.css('display', 'none');
+                }, 500);
+            }, 2000);
         });
     </script>
 </head>
 
 <body>
+    <!-- Rotate Overlay (Shows for 2s) -->
+    <div id="rotate-reminder">
+        <div class="phone-icon"></div>
+        <h2>Please Rotate Your Phone</h2>
+        <p>Turn your phone horizontally to view the animation!</p>
+    </div>
+
     <div id="viewport-scaler">
         <div id="main">
             <div id="error"><a
@@ -202,18 +283,33 @@
             var hold = 1;
 
             function getCanvasCoordinates(e) {
-                var offset = canvas.offset();
-                var pageX = e.pageX || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageX : 0);
-                var pageY = e.pageY || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageY : 0);
+                var rect = canvas[0].getBoundingClientRect();
+                var clientX = e.clientX || (e.originalEvent && e.originalEvent.touches && e.originalEvent.touches[0] ? e.originalEvent.touches[0].clientX : 0);
+                var clientY = e.clientY || (e.originalEvent && e.originalEvent.touches && e.originalEvent.touches[0] ? e.originalEvent.touches[0].clientY : 0);
 
-                var effectiveScale = currentScale * 0.95;
+                var x, y;
 
-                return {
-                    x: (pageX - offset.left) / effectiveScale,
-                    y: (pageY - offset.top) / effectiveScale
-                };
+                if (isForcedRotated) {
+                    // Coordinate translation for 90deg CSS rotation
+                    var normX = (clientX - rect.left) / rect.width;
+                    var normY = (clientY - rect.top) / rect.height;
+                    
+                    x = normY * canvas[0].width;
+                    y = (1 - normX) * canvas[0].height;
+                } else {
+                    var effectiveScale = currentScale * 0.95;
+                    var offset = canvas.offset();
+                    var pageX = e.pageX || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageX : 0);
+                    var pageY = e.pageY || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageY : 0);
+
+                    x = (pageX - offset.left) / effectiveScale;
+                    y = (pageY - offset.top) / effectiveScale;
+                }
+
+                return { x: x, y: y };
             }
 
+            // Click / Touch listener
             canvas.on("click touchstart", function (e) {
                 playAudio();
 
@@ -227,7 +323,8 @@
                     y >= seed.heart.point.y - 40 &&
                     y <= seed.heart.point.y + 70;
 
-                if (seed.hover(x, y) || textClicked) {
+                // Trigger on seed hit, text hit, or any tap on mobile for effortless interaction
+                if (seed.hover(x, y) || textClicked || isForcedRotated) {
                     hold = 0;
                     canvas.unbind("click touchstart");
                     canvas.unbind("mousemove");
