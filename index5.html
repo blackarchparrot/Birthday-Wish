@@ -24,6 +24,7 @@
             padding: 0;
             overflow: hidden;
             background-color: #ffe;
+            cursor: pointer;
         }
 
         #viewport-scaler {
@@ -40,7 +41,6 @@
 
         #main {
             transform-origin: center top;
-            pointer-events: auto;
             margin-top: -20px !important;
         }
 
@@ -58,7 +58,7 @@
             font-size: 1.15em !important;
         }
 
-        /* --- Rotate Reminder Overlay (Temporary 2s Instruction) --- */
+        /* --- Rotate Reminder Overlay (2s Instruction) --- */
         #rotate-reminder {
             display: none;
             position: fixed;
@@ -77,6 +77,7 @@
             padding: 20px;
             box-sizing: border-box;
             transition: opacity 0.5s ease;
+            pointer-events: none; /* Allows click-through to start animation */
         }
 
         .phone-icon {
@@ -137,7 +138,6 @@
 
     <script>
         var currentScale = 1;
-        var isForcedRotated = false;
 
         function playAudio() {
             var audio = document.getElementById("myAudio");
@@ -156,9 +156,6 @@
             if (window.innerHeight > window.innerWidth && window.innerWidth <= 900) {
                 windowWidth = $(window).height();
                 windowHeight = $(window).width();
-                isForcedRotated = true;
-            } else {
-                isForcedRotated = false;
             }
 
             var scaleX = windowWidth / targetWidth;
@@ -282,67 +279,19 @@
             var foot = tree.footer;
             var hold = 1;
 
-            function getCanvasCoordinates(e) {
-                var rect = canvas[0].getBoundingClientRect();
-                var clientX = e.clientX || (e.originalEvent && e.originalEvent.touches && e.originalEvent.touches[0] ? e.originalEvent.touches[0].clientX : 0);
-                var clientY = e.clientY || (e.originalEvent && e.originalEvent.touches && e.originalEvent.touches[0] ? e.originalEvent.touches[0].clientY : 0);
-
-                var x, y;
-
-                if (isForcedRotated) {
-                    // Coordinate translation for 90deg CSS rotation
-                    var normX = (clientX - rect.left) / rect.width;
-                    var normY = (clientY - rect.top) / rect.height;
-                    
-                    x = normY * canvas[0].width;
-                    y = (1 - normX) * canvas[0].height;
-                } else {
-                    var effectiveScale = currentScale * 0.95;
-                    var offset = canvas.offset();
-                    var pageX = e.pageX || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageX : 0);
-                    var pageY = e.pageY || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageY : 0);
-
-                    x = (pageX - offset.left) / effectiveScale;
-                    y = (pageY - offset.top) / effectiveScale;
-                }
-
-                return { x: x, y: y };
-            }
-
-            // Click / Touch listener
-            canvas.on("click touchstart", function (e) {
-                playAudio();
-
-                var coords = getCanvasCoordinates(e);
-                var x = coords.x;
-                var y = coords.y;
-
-                var textClicked =
-                    x >= seed.heart.point.x + 40 &&
-                    x <= seed.heart.point.x + 340 &&
-                    y >= seed.heart.point.y - 40 &&
-                    y <= seed.heart.point.y + 70;
-
-                // Trigger on seed hit, text hit, or any tap on mobile for effortless interaction
-                if (seed.hover(x, y) || textClicked || isForcedRotated) {
+            // Trigger action on document/screen tap anywhere
+            function triggerStart() {
+                if (hold === 1) {
+                    playAudio();
                     hold = 0;
-                    canvas.unbind("click touchstart");
-                    canvas.unbind("mousemove");
+                    $(document).off("click touchstart", triggerStart);
+                    canvas.unbind("click touchstart mousemove");
                     canvas.removeClass("hand");
                 }
-            }).mousemove(function (e) {
-                var coords = getCanvasCoordinates(e);
-                var x = coords.x;
-                var y = coords.y;
+            }
 
-                var textHover =
-                    x >= seed.heart.point.x + 40 &&
-                    x <= seed.heart.point.x + 340 &&
-                    y >= seed.heart.point.y - 40 &&
-                    y <= seed.heart.point.y + 70;
-
-                canvas.toggleClass("hand", seed.hover(x, y) || textHover);
-            });
+            // Bind click/tap to whole document for guaranteed response
+            $(document).on("click touchstart", triggerStart);
 
             var seedAnimate = eval(Jscex.compile("async", function () {
                 seed.draw();
