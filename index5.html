@@ -32,32 +32,33 @@
             height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            padding-top: 10px;
             overflow: hidden;
             box-sizing: border-box;
             transition: transform 0.3s ease;
         }
 
         #main {
-            transform-origin: center center;
-            margin: 0 auto !important;
+            transform-origin: center top;
+            margin-top: -20px !important;
         }
 
         #wrap {
             margin-top: 0 !important;
         }
 
-        /* --- Text Styling (Bigger & Clearer) --- */
+        /* --- Text Styling --- */
         #code {
-            font-size: 1.45em !important;
-            line-height: 1.6 !important;
+            font-size: 1.28em !important;
+            line-height: 1.5 !important;
         }
 
         #clock-box {
-            font-size: 1.2em !important;
+            font-size: 1.15em !important;
         }
 
-        /* --- Rotate Reminder Overlay --- */
+        /* --- Rotate Reminder Overlay (2s Instruction) --- */
         #rotate-reminder {
             display: none;
             position: fixed;
@@ -76,7 +77,7 @@
             padding: 20px;
             box-sizing: border-box;
             transition: opacity 0.5s ease;
-            pointer-events: none;
+            pointer-events: none; /* Allows click-through to start animation */
         }
 
         .phone-icon {
@@ -129,8 +130,7 @@
                 height: 100vw !important;
                 top: 50%;
                 left: 50%;
-                /* Rotated -90deg so top text stays top when user tilts right */
-                transform: translate(-50%, -50%) rotate(-90deg);
+                transform: translate(-50%, -50%) rotate(90deg);
                 transform-origin: center center;
             }
         }
@@ -147,25 +147,23 @@
         }
 
         function autoScaleViewport() {
-            var targetWidth = 1100;
-            var targetHeight = 680;
+            var targetWidth = 1000;
+            var targetHeight = 600;
 
             var windowWidth = $(window).width();
             var windowHeight = $(window).height();
 
-            // Swap dimensions when forced portrait rotation applies
             if (window.innerHeight > window.innerWidth && window.innerWidth <= 900) {
                 windowWidth = $(window).height();
                 windowHeight = $(window).width();
             }
 
-            // Fill full width/height better on modern widescreen devices
             var scaleX = windowWidth / targetWidth;
             var scaleY = windowHeight / targetHeight;
-            currentScale = Math.max(scaleX, scaleY) * 0.92;
+            currentScale = Math.min(scaleX, scaleY);
 
             $('#main').css({
-                'transform': 'scale(' + currentScale + ')'
+                'transform': 'scale(' + (currentScale * 0.95) + ')'
             });
         }
 
@@ -175,6 +173,7 @@
                 autoScaleViewport();
             });
 
+            // Show instruction overlay for 2 seconds, then fade out smoothly
             setTimeout(function() {
                 var reminder = $('#rotate-reminder');
                 reminder.css('opacity', '0');
@@ -187,7 +186,7 @@
 </head>
 
 <body>
-    <!-- Rotate Overlay -->
+    <!-- Rotate Overlay (Shows for 2s) -->
     <div id="rotate-reminder">
         <div class="phone-icon"></div>
         <h2>Please Rotate Your Phone</h2>
@@ -280,6 +279,7 @@
             var foot = tree.footer;
             var hold = 1;
 
+            // Trigger action on document/screen tap anywhere
             function triggerStart() {
                 if (hold === 1) {
                     playAudio();
@@ -290,6 +290,7 @@
                 }
             }
 
+            // Bind click/tap to whole document for guaranteed response
             $(document).on("click touchstart", triggerStart);
 
             var seedAnimate = eval(Jscex.compile("async", function () {
