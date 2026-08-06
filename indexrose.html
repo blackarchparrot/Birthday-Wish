@@ -74,14 +74,90 @@
     <button class="music-toggle" id="musicToggle" aria-label="Toggle Music">
         <span class="music-icon">🔊</span>
     </button>
+<style>
+  /* Glitter Button Styling */
+  .letter-btn {
+    position: relative;
+    padding: 14px 28px;
+    font-size: 1.05em;
+    font-weight: bold;
+    color: #ffffff;
+    background: linear-gradient(135deg, #ff4e50, #f9d423);
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
+    box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
+    animation: pulseGlow 1.8s infinite ease-in-out;
+    transition: transform 0.2s ease;
+  }
+
+  .letter-btn:active {
+    transform: scale(0.96);
+  }
+
+  /* Shimmer / Glitter Sweep Effect */
+  .letter-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 50%;
+    height: 200%;
+    background: linear-gradient(
+      60deg,
+      rgba(255, 255, 255, 0) 20%,
+      rgba(255, 255, 255, 0.8) 50%,
+      rgba(255, 255, 255, 0) 80%
+    );
+    transform: rotate(25deg);
+    animation: glitterSweep 2.5s infinite;
+  }
+
+  /* Tap Prompt Indicator */
+  .tap-hint {
+    display: inline-block;
+    margin-left: 6px;
+    animation: bounceArrow 1.2s infinite ease-in-out;
+  }
+
+  /* Animations */
+  @keyframes glitterSweep {
+    0% { left: -60%; }
+    40% { left: 140%; }
+    100% { left: 140%; }
+  }
+
+  @keyframes pulseGlow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 78, 80, 0.7);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 20px 8px rgba(255, 78, 80, 0);
+      transform: scale(1.03);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 78, 80, 0);
+      transform: scale(1);
+    }
+  }
+
+  @keyframes bounceArrow {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+  }
+</style>
+
 <div class="end-text" id="endText">
     <p class="romantic-message">Every petal blooms with love</p>
     <p class="tagline" id="tagline">for Love ❤</p>
     
-    <!-- Wrapped with <a> tag -->
-    <a href="f2.html" style="text-decoration: none;">
+    <!-- Link redirect with shimmering & glowing button -->
+    <a href="index.html" style="text-decoration: none;">
         <button class="letter-btn" id="letterBtn">
-            <span class="letter-btn-icon">💌</span> Close your eyes and come with me
+            <span class="letter-btn-icon">💌</span> Close your eyes and come with me <span class="tap-hint">👉</span>
         </button>
     </a>
 
