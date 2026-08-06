@@ -84,19 +84,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Update instructions area with an attractive button
         setTimeout(() => {
-            const instructionsElem = document.querySelector('.instructions');
-            instructionsElem.innerHTML = ''; // Clear text
-
-            const surpriseBtn = document.createElement('button');
-            surpriseBtn.className = 'surprise-btn';
-            surpriseBtn.innerHTML = '🎁 Get the Surprise! ✨';
+            // FIX: Match the class name from HTML (.instruction-banner)
+            const instructionsElem = document.querySelector('.instruction-banner');
             
-            // Redirect when clicked
-            surpriseBtn.addEventListener('click', () => {
-                window.location.href = 'index5.html';
-            });
+            if (instructionsElem) {
+                instructionsElem.innerHTML = ''; // Clear text
+                instructionsElem.style.animation = 'none'; // Stop pulse animation
 
-            instructionsElem.appendChild(surpriseBtn);
+                const surpriseBtn = document.createElement('button');
+                surpriseBtn.className = 'surprise-btn';
+                surpriseBtn.style.cssText = `
+                    background: #ff4b72;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    font-size: 1.1rem;
+                    font-weight: bold;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                `;
+                surpriseBtn.innerHTML = '🎁 Get the Surprise! ✨';
+                
+                // Redirect when clicked
+                surpriseBtn.addEventListener('click', () => {
+                    window.location.href = 'index5.html';
+                });
+
+                instructionsElem.appendChild(surpriseBtn);
+            }
         }, candles.length * 80 + 300);
     }
 
@@ -122,5 +138,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function onConfettiEnd() {
-    document.getElementById('gifContainer').style.display = 'block';
+    const gifContainer = document.getElementById('gifContainer');
+    if (gifContainer) {
+        gifContainer.style.display = 'block';
+    }
 }
