@@ -3,7 +3,8 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Prevents default user zooming and forces exact screen fitting -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Birthday Heart Animation | @coding.stella</title>
     <link type="text/css" rel="stylesheet" href="default.css">
     <script type="text/javascript" src="jquery.min.js"></script>
@@ -17,78 +18,79 @@
     <script type="text/javascript" src="love.js" charset="utf-8"></script>
 
     <style>
-        /* Rotate Overlay Styling */
-        #rotate-reminder {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        /* Force body to take full screen without scrollbars */
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #ffe;
+        }
+
+        /* Responsive Wrapper to scale the fixed canvas/content automatically */
+        #viewport-scaler {
             width: 100vw;
             height: 100vh;
-            background-color: #000000;
-            color: #ffffff;
-            z-index: 99999;
-            flex-direction: column;
+            display: flex;
             justify-content: center;
             align-items: center;
-            text-align: center;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            box-sizing: border-box;
+            overflow: hidden;
         }
 
-        .phone-icon {
-            width: 60px;
-            height: 100px;
-            border: 4px solid #ffffff;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            position: relative;
-            animation: rotatePhone 2s infinite ease-in-out;
+        /* Ensure main content scales dynamically from top-left center */
+        #main {
+            transform-origin: center center;
+            transition: transform 0.2s ease-out;
         }
 
-        .phone-icon::after {
-            content: '';
-            position: absolute;
-            bottom: 6px;
+        /* Temporary Floating Popup */
+        #rotate-popup {
+            display: none;
+            position: fixed;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 10px;
-            height: 10px;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-        }
-
-        @keyframes rotatePhone {
-            0% {
-                transform: rotate(0deg);
-            }
-            50% {
-                transform: rotate(-90deg);
-            }
-            100% {
-                transform: rotate(-90deg);
-            }
-        }
-
-        #rotate-reminder h2 {
-            margin: 0 0 10px 0;
-            font-size: 22px;
-        }
-
-        #rotate-reminder p {
-            margin: 0;
+            background: rgba(0, 0, 0, 0.85);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 25px;
+            z-index: 99999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: Arial, sans-serif;
             font-size: 14px;
-            color: #cccccc;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
-        /* Show overlay ONLY on screens smaller than 900px held in Portrait orientation */
+        #rotate-popup .popup-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phone-icon-small {
+            width: 14px;
+            height: 22px;
+            border: 2px solid #fff;
+            border-radius: 3px;
+            position: relative;
+            animation: rotateSmallPhone 1.5s infinite ease-in-out;
+        }
+
+        @keyframes rotateSmallPhone {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+            100% { transform: rotate(-90deg); }
+        }
+
+        /* Show popup ONLY on mobile portrait mode */
         @media screen and (max-width: 900px) and (orientation: portrait) {
-            #rotate-reminder {
-                display: flex !important;
-            }
-            #main {
-                display: none !important;
+            #rotate-popup.active {
+                display: block;
+                opacity: 1;
             }
         }
     </style>
@@ -100,43 +102,85 @@
                 audio.play();
             }
         }
+
+        // Auto-Fit Function: Scales the fixed 1100x680 canvas to fit ANY screen size
+        function autoScaleViewport() {
+            var targetWidth = 1100;
+            var targetHeight = 680;
+
+            var windowWidth = $(window).width();
+            var windowHeight = $(window).height();
+
+            // Calculate exact scale factor needed
+            var scaleX = windowWidth / targetWidth;
+            var scaleY = windowHeight / targetHeight;
+            var scale = Math.min(scaleX, scaleY);
+
+            // Apply scale transform to #main
+            $('#main').css({
+                'transform': 'scale(' + scale + ')'
+            });
+        }
+
+        $(document).ready(function() {
+            // Run scale calculation immediately and on window resize/orientation change
+            autoScaleViewport();
+            $(window).on('resize orientationchange', function() {
+                autoScaleViewport();
+            });
+
+            // Handle rotate popup
+            var $popup = $('#rotate-popup');
+            $popup.addClass('active');
+
+            setTimeout(function() {
+                $popup.css('opacity', '0');
+                setTimeout(function() {
+                    $popup.removeClass('active');
+                }, 500);
+            }, 2000);
+        });
     </script>
 </head>
 
 <body>
-    <!-- Screen Rotation Overlay for Mobile Devices -->
-    <div id="rotate-reminder">
-        <div class="phone-icon"></div>
-        <h2>Please Rotate Your Phone</h2>
-        <p>Turn your device horizontally (Landscape mode) to view the birthday animation properly.</p>
+    <!-- Temporary Popup Banner -->
+    <div id="rotate-popup">
+        <div class="popup-content">
+            <div class="phone-icon-small"></div>
+            <span>Rotate phone to landscape for best view 🔄</span>
+        </div>
     </div>
 
-    <div id="main">
-        <div id="error"><a
-                href="http://www.google.cn/chrome/intl/zh-CN/landing_chrome.html?hl=zh-CN&brand=CHMI">Chrome</a> (<a
-                href="http://firefox.com.cn/download/">Firefox</a>)</div>
-        <audio autoplay="autoplay" height="100" width="100" id="myAudio">
-            <source src="aud.mp3" type="audio/mp3" />
-            <embed height="100" width="100" src="aud.mp3" />
-        </audio>
-        <div id="wrap">
-            <div id="text">
-                <div id="code">
-                    <span class="say">Hey you 💞</span><br>
-                    <span class="say">Happy Birthday 🎈</span><br>
-                    <span class="say">May God bless you 🍀</span><br>
-                    <span class="say">And give u many happiness 💕</span><br>
-                    <span class="say">Just saying... you're pretty awesome ❤️</span><br>
-                    <span class="say">Sending good vibes and maybe a wink 😏</span><br>
-                    <span class="say">Hope u have a great day today ❤️😘</span><br><br><br>
-                    <span class="say"><strong>Waiting For your Special Treat😄</strong></span><br>
-                    <span class="say"><p align="right">---Black Parrot</p></span>
+    <!-- Container wrapper to lock aspect ratio and center scale -->
+    <div id="viewport-scaler">
+        <div id="main">
+            <div id="error"><a
+                    href="http://www.google.cn/chrome/intl/zh-CN/landing_chrome.html?hl=zh-CN&brand=CHMI">Chrome</a> (<a
+                    href="http://firefox.com.cn/download/">Firefox</a>)</div>
+            <audio autoplay="autoplay" height="100" width="100" id="myAudio">
+                <source src="aud.mp3" type="audio/mp3" />
+                <embed height="100" width="100" src="aud.mp3" />
+            </audio>
+            <div id="wrap">
+                <div id="text">
+                    <div id="code">
+                        <span class="say">Hey you 💞</span><br>
+                        <span class="say">Happy Birthday 🎈</span><br>
+                        <span class="say">May God bless you 🍀</span><br>
+                        <span class="say">And give u many happiness 💕</span><br>
+                        <span class="say">Just saying... you're pretty awesome ❤️</span><br>
+                        <span class="say">Sending good vibes and maybe a wink 😏</span><br>
+                        <span class="say">Hope u have a great day today ❤️😘</span><br><br><br>
+                        <span class="say"><strong>Waiting For your Special Treat😄</strong></span><br>
+                        <span class="say"><p align="right">---Black Parrot</p></span>
+                    </div>
                 </div>
+                <div id="clock-box">
+                     <span id="clock">6570 days 0 hours 0 minutes 0 seconds</span>
+                </div>
+                <canvas id="canvas" width="1100" height="680"></canvas>
             </div>
-            <div id="clock-box">
-                 <span id="clock">6570 days 0 hours 0 minutes 0 seconds</span>
-            </div>
-            <canvas id="canvas" width="1100" height="680"></canvas>
         </div>
     </div>
 
