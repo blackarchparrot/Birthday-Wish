@@ -31,19 +31,26 @@
             height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Align closer to top */
+            padding-top: 10px;       /* Small breathable gap */
             overflow: hidden;
             pointer-events: none;
+            box-sizing: border-box;
         }
 
         #main {
-            transform-origin: center center;
+            transform-origin: center top; /* Scale from top center */
             pointer-events: auto;
+            margin-top: -30px !important;  /* Shifts the entire content upwards */
         }
 
-        /* --- Adjust Text Sizes Bigger & Spacing --- */
+        #wrap {
+            margin-top: 0 !important;
+        }
+
+        /* --- Text Styling --- */
         #code {
-            font-size: 1.28em !important; /* Slightly larger text */
+            font-size: 1.28em !important;
             line-height: 1.5 !important;
         }
 
@@ -51,7 +58,7 @@
             font-size: 1.15em !important;
         }
 
-        /* Full-Screen Rotate Reminder Overlay */
+        /* Full-Screen Rotate Overlay */
         #rotate-reminder {
             display: none;
             position: fixed;
@@ -131,8 +138,8 @@
         }
 
         function autoScaleViewport() {
-            var targetWidth = 1000;  /* Scaled layout standard bounds down */
-            var targetHeight = 620;
+            var targetWidth = 1000;
+            var targetHeight = 600;
 
             var windowWidth = $(window).width();
             var windowHeight = $(window).height();
@@ -142,7 +149,7 @@
             currentScale = Math.min(scaleX, scaleY);
 
             $('#main').css({
-                'transform': 'scale(' + (currentScale * 0.92) + ')' /* Everything else scaled slightly smaller */
+                'transform': 'scale(' + (currentScale * 0.95) + ')'
             });
         }
 
@@ -212,7 +219,7 @@
                 seed: {
                     x: width / 2 - 20,
                     color: "rgb(190, 26, 37)",
-                    scale: 3.6  /* Seed/heart graphics slightly scaled down */
+                    scale: 3.6
                 },
                 branch: [
                     [535, 680, 570, 250, 500, 200, 30, 100, [
@@ -254,7 +261,7 @@
                 var pageX = e.pageX || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageX : 0);
                 var pageY = e.pageY || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageY : 0);
 
-                var effectiveScale = currentScale * 0.92;
+                var effectiveScale = currentScale * 0.95;
 
                 return {
                     x: (pageX - offset.left) / effectiveScale,
