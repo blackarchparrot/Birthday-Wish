@@ -32,33 +32,31 @@
             height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            padding-top: 10px;
+            align-items: center;
             overflow: hidden;
             box-sizing: border-box;
-            transition: transform 0.3s ease;
         }
 
         #main {
-            transform-origin: center top;
-            margin-top: -20px !important;
+            transform-origin: center center;
+            margin: 0 auto !important;
         }
 
         #wrap {
             margin-top: 0 !important;
         }
 
-        /* --- Text Styling --- */
+        /* --- Text Styling (Bigger & Readable) --- */
         #code {
-            font-size: 1.28em !important;
-            line-height: 1.5 !important;
+            font-size: 1.45em !important;
+            line-height: 1.6 !important;
         }
 
         #clock-box {
-            font-size: 1.15em !important;
+            font-size: 1.2em !important;
         }
 
-        /* --- Rotate Reminder Overlay (2s Instruction) --- */
+        /* --- Rotate Reminder Overlay --- */
         #rotate-reminder {
             display: none;
             position: fixed;
@@ -66,7 +64,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: rgba(0, 0, 0, 0.92);
+            background-color: rgba(0, 0, 0, 0.95);
             color: #ffffff;
             z-index: 99999;
             flex-direction: column;
@@ -76,8 +74,6 @@
             font-family: Arial, sans-serif;
             padding: 20px;
             box-sizing: border-box;
-            transition: opacity 0.5s ease;
-            pointer-events: none; /* Allows click-through to start animation */
         }
 
         .phone-icon {
@@ -119,19 +115,10 @@
             color: #cccccc;
         }
 
-        /* Force landscape rendering in portrait mobile mode */
+        /* Detect portrait mode and demand rotation naturally */
         @media screen and (max-width: 900px) and (orientation: portrait) {
             #rotate-reminder {
                 display: flex !important;
-            }
-            #viewport-scaler {
-                position: fixed;
-                width: 100vh !important;
-                height: 100vw !important;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(90deg);
-                transform-origin: center center;
             }
         }
     </style>
@@ -147,23 +134,19 @@
         }
 
         function autoScaleViewport() {
-            var targetWidth = 1000;
-            var targetHeight = 600;
+            var targetWidth = 1100;
+            var targetHeight = 680;
 
             var windowWidth = $(window).width();
             var windowHeight = $(window).height();
 
-            if (window.innerHeight > window.innerWidth && window.innerWidth <= 900) {
-                windowWidth = $(window).height();
-                windowHeight = $(window).width();
-            }
-
+            // Calculate exact proportions to scale canvas cleanly in actual landscape mode
             var scaleX = windowWidth / targetWidth;
             var scaleY = windowHeight / targetHeight;
-            currentScale = Math.min(scaleX, scaleY);
+            currentScale = Math.min(scaleX, scaleY) * 0.95;
 
             $('#main').css({
-                'transform': 'scale(' + (currentScale * 0.95) + ')'
+                'transform': 'scale(' + currentScale + ')'
             });
         }
 
@@ -172,21 +155,12 @@
             $(window).on('resize orientationchange', function() {
                 autoScaleViewport();
             });
-
-            // Show instruction overlay for 2 seconds, then fade out smoothly
-            setTimeout(function() {
-                var reminder = $('#rotate-reminder');
-                reminder.css('opacity', '0');
-                setTimeout(function() {
-                    reminder.css('display', 'none');
-                }, 500);
-            }, 2000);
         });
     </script>
 </head>
 
 <body>
-    <!-- Rotate Overlay (Shows for 2s) -->
+    <!-- Rotate Overlay (Blocks view in portrait mode so user turns device natively) -->
     <div id="rotate-reminder">
         <div class="phone-icon"></div>
         <h2>Please Rotate Your Phone</h2>
@@ -279,7 +253,6 @@
             var foot = tree.footer;
             var hold = 1;
 
-            // Trigger action on document/screen tap anywhere
             function triggerStart() {
                 if (hold === 1) {
                     playAudio();
@@ -290,7 +263,6 @@
                 }
             }
 
-            // Bind click/tap to whole document for guaranteed response
             $(document).on("click touchstart", triggerStart);
 
             var seedAnimate = eval(Jscex.compile("async", function () {
