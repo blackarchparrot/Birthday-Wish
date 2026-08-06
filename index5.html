@@ -33,15 +33,25 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            pointer-events: none; /* Let clicks pass directly through to main elements */
+            pointer-events: none;
         }
 
         #main {
             transform-origin: center center;
-            pointer-events: auto; /* Re-enable clicks specifically for canvas and content */
+            pointer-events: auto;
         }
 
-        /* Original Full-Screen Rotate Reminder Overlay */
+        /* --- Adjust Text Sizes Bigger & Spacing --- */
+        #code {
+            font-size: 1.28em !important; /* Slightly larger text */
+            line-height: 1.5 !important;
+        }
+
+        #clock-box {
+            font-size: 1.15em !important;
+        }
+
+        /* Full-Screen Rotate Reminder Overlay */
         #rotate-reminder {
             display: none;
             position: fixed;
@@ -84,15 +94,9 @@
         }
 
         @keyframes rotatePhone {
-            0% {
-                transform: rotate(0deg);
-            }
-            50% {
-                transform: rotate(-90deg);
-            }
-            100% {
-                transform: rotate(-90deg);
-            }
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+            100% { transform: rotate(-90deg); }
         }
 
         #rotate-reminder h2 {
@@ -106,7 +110,6 @@
             color: #cccccc;
         }
 
-        /* Show rotate overlay ONLY on small screens in Portrait mode */
         @media screen and (max-width: 900px) and (orientation: portrait) {
             #rotate-reminder {
                 display: flex !important;
@@ -128,8 +131,8 @@
         }
 
         function autoScaleViewport() {
-            var targetWidth = 1100;
-            var targetHeight = 680;
+            var targetWidth = 1000;  /* Scaled layout standard bounds down */
+            var targetHeight = 620;
 
             var windowWidth = $(window).width();
             var windowHeight = $(window).height();
@@ -139,7 +142,7 @@
             currentScale = Math.min(scaleX, scaleY);
 
             $('#main').css({
-                'transform': 'scale(' + currentScale + ')'
+                'transform': 'scale(' + (currentScale * 0.92) + ')' /* Everything else scaled slightly smaller */
             });
         }
 
@@ -153,7 +156,7 @@
 </head>
 
 <body>
-    <!-- Restored Original Rotate Overlay -->
+    <!-- Rotate Overlay -->
     <div id="rotate-reminder">
         <div class="phone-icon"></div>
         <h2>Please Rotate Your Phone</h2>
@@ -209,7 +212,7 @@
                 seed: {
                     x: width / 2 - 20,
                     color: "rgb(190, 26, 37)",
-                    scale: 4
+                    scale: 3.6  /* Seed/heart graphics slightly scaled down */
                 },
                 branch: [
                     [535, 680, 570, 250, 500, 200, 30, 100, [
@@ -230,7 +233,7 @@
                     ]]
                 ],
                 bloom: {
-                    num: 700,
+                    num: 650,
                     width: 1080,
                     height: 650,
                 },
@@ -246,15 +249,16 @@
             var foot = tree.footer;
             var hold = 1;
 
-            // Recalculates canvas offset accurately even when scaled on mobile
             function getCanvasCoordinates(e) {
                 var offset = canvas.offset();
                 var pageX = e.pageX || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageX : 0);
                 var pageY = e.pageY || (e.originalEvent && e.originalEvent.touches ? e.originalEvent.touches[0].pageY : 0);
 
+                var effectiveScale = currentScale * 0.92;
+
                 return {
-                    x: (pageX - offset.left) / currentScale,
-                    y: (pageY - offset.top) / currentScale
+                    x: (pageX - offset.left) / effectiveScale,
+                    y: (pageY - offset.top) / effectiveScale
                 };
             }
 
