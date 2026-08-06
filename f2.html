@@ -130,7 +130,7 @@
             50% { opacity: 1; }
         }
 
-        /* Text Reveals */
+        /* Text Reveals & Transitions */
         .fairy-message {
             display: none;
             font-size: 1.3rem;
@@ -139,6 +139,8 @@
             text-shadow: 0 0 12px rgba(255, 182, 193, 0.9);
             margin-top: 20px;
             line-height: 1.6;
+            opacity: 1;
+            transition: opacity 0.3s ease; /* Fast fade out transition */
         }
 
         .wish-text {
@@ -147,6 +149,7 @@
             color: #fff0f5;
             text-shadow: 0 0 20px #ff69b4, 0 0 30px #ff1493;
             margin: 20px 0;
+            animation: fadeIn 0.5s ease-in-out forwards;
         }
 
         .final-quote {
@@ -156,6 +159,7 @@
             font-style: italic;
             margin-top: 15px;
             line-height: 1.5;
+            animation: fadeIn 0.5s ease-in-out forwards;
         }
 
         .next-btn {
@@ -172,10 +176,16 @@
             box-shadow: 0 0 15px rgba(255, 105, 180, 0.6);
             transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
+            animation: fadeIn 0.5s ease-in-out forwards;
         }
         .next-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 0 25px rgba(255, 105, 180, 0.9);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -337,12 +347,16 @@
             const fairyMsg = document.getElementById('fairyMsg');
             fairyMsg.style.display = 'block';
 
+            // Reduced time to 1200ms (1.2 seconds) for a fast reveal
             setTimeout(() => {
-                fairyMsg.style.display = 'none';
-                document.getElementById('wishText').style.display = 'block';
-                document.getElementById('finalQuote').style.display = 'block';
-                document.getElementById('nextBtn').style.display = 'inline-block';
-            }, 3800);
+                fairyMsg.style.opacity = '0';
+                setTimeout(() => {
+                    fairyMsg.style.display = 'none';
+                    document.getElementById('wishText').style.display = 'block';
+                    document.getElementById('finalQuote').style.display = 'block';
+                    document.getElementById('nextBtn').style.display = 'inline-block';
+                }, 200);
+            }, 1200);
         }
 
         function triggerMoonGlow() {
